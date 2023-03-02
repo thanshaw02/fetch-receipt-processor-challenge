@@ -11,12 +11,28 @@ import (
 	// "os"
 )
 
+/*
+	NOTES:
+	
+	- (*http.Request).Has("QUERY_STRING_HERE") --> returns a boolean if the query string is present
+	- (*http.Request).Get("QUERY_STRING_HERE") --> returns a string using the query string name passed, if not found returns an empty string
+*/
+
 const keyServerAddr = "server-address"
 
 func getRoot(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	fmt.Printf("%s: got / request\n", ctx.Value(keyServerAddr))
+	hasFirst := r.URL.Query().Has("first")
+	first := r.URL.Query().Get("first")
+	hasSecond := r.URL.Query().Has("second")
+	second := r.URL.Query().Get("second")
+
+	fmt.Printf("%s: got / request. first(%t)=%s, second(%t)=%s\n",
+		ctx.Value(keyServerAddr),
+		hasFirst, first,
+		hasSecond, second,
+	)
 	io.WriteString(w, "This is my website!\n")
 }
 
@@ -32,9 +48,8 @@ func main() {
 	mux.HandleFunc("/", getRoot)
 	mux.HandleFunc("/hello", getHello)
 	
-	ctx, cancelCtx := context.WithCancel(context.Background())
-
-	serverOne := &http.Server {
+	ctx := context.Background()
+	server := &http.Server {
 		Addr: "127.0.0.1:3000",
 		Handler: mux,
 		BaseContext: func(l net.Listener) context.Context {
@@ -42,37 +57,11 @@ func main() {
 			return ctx
 		},
 	}
-
-	serverTwo := &http.Server {
-		Addr: "127.0.0.1:4000",
-		Handler: mux,
-		BaseContext: func(l net.Listener) context.Context {
-			ctx = context.WithValue(ctx, keyServerAddr, l.Addr().String())
-			return ctx
-		},
-	}
-
-	// starting "serverOne" in a "goroutine"
-	go func() {
-		err := serverOne.ListenAndServe()
-		if errors.Is(err, http.ErrServerClosed) {
-			fmt.Printf("server one has closed\n")
-		} else if err != nil {
-			fmt.Printf("error listening for server one: %s", err)
-		}
-		cancelCtx()
-	}()
 	
-	// starting "serverOne" in a "goroutine"
-	go func() {
-		err := serverTwo.ListenAndServe()
-		if errors.Is(err, http.ErrServerClosed) {
-			fmt.Printf("server two has closed\n")
-		} else if err != nil {
-			fmt.Printf("error listening for server two: %s", err)
-		}
-		cancelCtx()
-	}()
-
-	<-ctx.Done()
+	err := server.ListenAndServe()
+	if errors.Is(err, http.ErrServerClosed) {
+		fmt.Printf("server has be closed\n")
+	} else if err != nil {
+		fmt.Printf("error listening for server: %s", err)
+	}
 }
