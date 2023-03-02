@@ -1,0 +1,97 @@
+NOTES:
+	
+Query param extraction:
+	- (*http.Request).Has("QUERY_STRING_HERE") --> returns a boolean if the query string is present
+	- (*http.Request).Get("QUERY_STRING_HERE") --> returns a string using the query string name passed
+		- returns a string value if the query string value is found
+		- returns an empty string if the key query string was found but not value was given
+	
+Body data extraction:
+	- ioutil.ReadAll((*http.Request).Body) --> reads all of the bytes from the requests Body and returns it
+
+Form data extraction:
+	- (*http.Request).PostFormValue("FORM_VALUE_NAME") --> returns the value with the given name when submitted as a form
+		- this works with a POST, PATH, or PUT requests
+		- returns an empty string if not key was found with the key we provide
+	- (*http.Request).FormValue("FORM_VALUE_NAME") --> returns the value with the given name when submitted as a form AND any values in the query string
+
+Setting response headers:
+	- (http.ResponseWriter).Header().Set("HEADER_TITLE", "HEADER_NAME")
+		- (http.ResponseWriter).Header() --> returns the Header map for the response
+		- Set("HEADER_TITLE", "HEADER_NAME") --> sets a new entry in the Header map where the first param is the key and the second param is the value
+	- (http.ResponseWriter).WriteHeader(HEADER_RESPONSE_CODE) --> sets the status code for the response
+		- example status codes:
+			- http.StatusBadRequest --> 400
+			- http.StatusAccepted --> 200
+			- etc.
+		- the built in status codes starts with "Status", so "http.Status___"\
+	- IMPORTANT: the order in which we set the data and headers does matter, we must set the headers before setting any data in a response
+		- same with calling "(http.ResponseWriter).Header().Set" and "(http.ResponseWriter).WriteHeader"
+		- setting/updating the header must be done BEFORE we write the header
+
+
+
+CODE:
+
+const keyServerAddr = "server-address"
+
+func getRoot(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	// fetching query params from request
+	hasFirst := r.URL.Query().Has("first")
+	first := r.URL.Query().Get("first")
+	hasSecond := r.URL.Query().Has("second")
+	second := r.URL.Query().Get("second")
+
+	// fetching Body data from request
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		fmt.Printf("could not read request body: %s\n", err)
+	}
+
+	fmt.Printf("%s: got / request. first(%t)=%s, second(%t)=%s, body:\n%s\n",
+		ctx.Value(keyServerAddr),
+		hasFirst, first,
+		hasSecond, second,
+		body,
+	)
+	io.WriteString(w, "This is my website!\n")
+}
+
+func getHello(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	fmt.Printf("%s: got /hello request\n", ctx.Value(keyServerAddr))
+
+	myName := r.PostFormValue("myName")
+	if myName == "" {
+		w.Header().Set("x-missing-field", "myName")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	io.WriteString(w, fmt.Sprintf("Hello, %s!\n", myName))
+}
+
+func main() {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", getRoot)
+	mux.HandleFunc("/hello", getHello)
+	
+	ctx := context.Background()
+	server := &http.Server {
+		Addr: "127.0.0.1:3000",
+		Handler: mux,
+		BaseContext: func(l net.Listener) context.Context {
+			ctx = context.WithValue(ctx, keyServerAddr, l.Addr().String())
+			return ctx
+		},
+	}
+	
+	err := server.ListenAndServe()
+	if errors.Is(err, http.ErrServerClosed) {
+		fmt.Printf("server has be closed\n")
+	} else if err != nil {
+		fmt.Printf("error listening for server: %s", err)
+	}
+}
