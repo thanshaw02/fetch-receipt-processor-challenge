@@ -28,6 +28,20 @@ import (
 			- this works with a POST, PATH, or PUT requests
 			- returns an empty string if not key was found with the key we provide
 		- (*http.Request).FormValue("FORM_VALUE_NAME") --> returns the value with the given name when submitted as a form AND any values in the query string
+
+	Setting response headers:
+		- (http.ResponseWriter).Header().Set("HEADER_TITLE", "HEADER_NAME")
+			- (http.ResponseWriter).Header() --> returns the Header map for the response
+			- Set("HEADER_TITLE", "HEADER_NAME") --> sets a new entry in the Header map where the first param is the key and the second param is the value
+		- (http.ResponseWriter).WriteHeader(HEADER_RESPONSE_CODE) --> sets the status code for the response
+			- example status codes:
+				- http.StatusBadRequest --> 400
+				- http.StatusAccepted --> 200
+				- etc.
+			- the built in status codes starts with "Status", so "http.Status___"\
+		- IMPORTANT: the order in which we set the data and headers does matter, we must set the headers before setting any data in a response
+			- same with calling "(http.ResponseWriter).Header().Set" and "(http.ResponseWriter).WriteHeader"
+			- setting/updating the header must be done BEFORE we write the header
 */
 
 const keyServerAddr = "server-address"
@@ -63,7 +77,9 @@ func getHello(w http.ResponseWriter, r *http.Request) {
 
 	myName := r.PostFormValue("myName")
 	if myName == "" {
-		myName = "HTTP"
+		w.Header().Set("x-missing-field", "myName")
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 	io.WriteString(w, fmt.Sprintf("Hello, %s!\n", myName))
 }
