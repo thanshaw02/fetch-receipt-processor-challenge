@@ -9,24 +9,21 @@ import (
 	"strings"
 	"time"
 	"unicode"
+	"errors"
 )
 
 // checks if the receipt JSON data sent via POST is valid and isn't missing any required fields
-func IsReceiptPostDataValid(receipt Receipt) IsValidReceiptType {
-	var ret IsValidReceiptType
+func IsReceiptPostDataValid(receipt Receipt) error {
 	receiptValues := reflect.ValueOf(receipt)
 	types := receiptValues.Type()
 	for i := 0; i < receiptValues.NumField(); i++ {
 		attrValue := fmt.Sprintf("%v", receiptValues.Field(i))
 		if len(attrValue) == 0 {
 			// this attribute is not preset, not valid
-			ret.IsValid = false
-			ret.InvalidReason = types.Field(i).Name
-			return ret
+			return  errors.New(types.Field(i).Name)
 		}
 	}
-	ret.IsValid = true
-	return ret
+	return nil
 }
 
 func CountAlphanumericCharacters(str string) int {
@@ -54,7 +51,7 @@ func CountItemDescriptionLength(items []Item) int {
 }
 
 // calculates the total points for the given receipt
-func PoolReceiptPoints(receipt Receipt) int {
+func PoolReceiptPoints(receipt Receipt) (int, error) {
 	// One point for every alphanumeric character in the retailer name.
 	totalPoints := CountAlphanumericCharacters(receipt.Retailer)
 
@@ -80,7 +77,7 @@ func PoolReceiptPoints(receipt Receipt) int {
 	purchaseDate, err := time.Parse("2006-01-02", receipt.PurchaseDate)
 	if err != nil {
 		log.Printf("[ poolReceiptPoints: error parsing receipt purchase date \"%s\": %s ]\n", receipt.PurchaseDate, err)
-		return -1
+		return -1, errors.New("invalid purchase date given")
 	}
 	_purchaseDay := purchaseDate.Day()
 	if _purchaseDay%2 != 0 {
@@ -91,7 +88,7 @@ func PoolReceiptPoints(receipt Receipt) int {
 	_purchaseTime, err := time.Parse("04:05", receipt.PurchaseTime)
 	if err != nil {
 		log.Printf("[ poolReceiptPoints: error parsing receipt purchase time \"%s\": %s ]\n", receipt.PurchaseTime, err)
-		return -1
+		return -1, errors.New("invalid purchase time given")
 	}
 
 	// this is a little hacky, couldn't quite get the 24-hour time format I needed
@@ -101,5 +98,5 @@ func PoolReceiptPoints(receipt Receipt) int {
 		totalPoints += 10
 	}
 
-	return totalPoints
+	return totalPoints, nil
 }
