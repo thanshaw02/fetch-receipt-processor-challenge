@@ -1,23 +1,19 @@
 package main
 
 import (
-	// "context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/gorilla/mux"
 	"io"
 	"math"
-	// "net"
 	"net/http"
 	"reflect"
 	"strconv"
 	"strings"
-
+	"unicode"
 	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 )
-
-const keyServerAddr = "fetch-receipt-server-address"
 
 // key: receipt id, value: receipt score
 var inMemoryReceipts = make(map[string]int)
@@ -75,31 +71,62 @@ func isReceiptPostDataValid(receipt Receipt) IsValidReceiptType {
 	return ret
 }
 
+func countAlphanumericCharacters(str string) int {
+	var count int
+	for _, char := range str {
+		if unicode.IsLetter(char) {
+			count += 1
+		}
+	}
+	return count
+}
+
 // calculates the total points for the given receipt
 func poolReceiptPoints(receipt Receipt) int {
-	totalPoints := len(receipt.Retailer)
+	// One point for every alphanumeric character in the retailer name.
+	totalPoints := countAlphanumericCharacters(receipt.Retailer)
+	fmt.Printf("\nRetailer name points: %v\n", totalPoints) // debugging
 
-	if strings.Contains(receipt.Total, ".") {
+	// 50 points if the total is a round dollar amount with no cents.
+	centsOfTotal := string(receipt.Total[len(receipt.Total) - 2:])
+	if centsOfTotal == "00" {
 		totalPoints += 50
+		fmt.Printf("\nReceipt total is even number (no change): %v\n", totalPoints) // debugging
 	}
 
+	// 25 points if the total is a multiple of 0.25
 	vertedTotal, _ := strconv.ParseFloat(receipt.Total, 64)
 	if math.Mod(vertedTotal, 0.25) == 0 {
 		totalPoints += 25
 	}
 
+	// 5 points for every two items on the receipt.
 	totalPoints += 5 * (len(receipt.Items) / 2)
 
 	// If the trimmed length of the item description is a multiple of 3, multiply the price by 0.2 and round up to the nearest integer. The result is the number of points earned.
+	items := receipt.Items
+	fmt.Println("\nParsing receipt item names")
+	for _, item := range items {
+		trimmedItemName := strings.Trim(item.ShortDescription, " ")
+		trimmedNameLength := len(trimmedItemName)
+		if math.Mod(float64(trimmedNameLength), 3) == 0 {
+			itemPrice, _ := strconv.ParseFloat(item.Price, 64)
+			pointsEarned := int(math.Ceil(itemPrice * 0.2))
+			totalPoints += pointsEarned
+		}
+	}
 
+	// 6 points if the day in the purchase date is odd.
 	foo := string(receipt.PurchaseDate[len(receipt.PurchaseDate) - 2:])
 	purchaseDay, _ := strconv.Atoi(foo)
-	fmt.Println("\nExtracted purchase day:", purchaseDay) // debugging
 	if purchaseDay % 2 != 0 {
 		totalPoints += 6
 	}
 
 	// 10 points if the time of purchase is after 2:00pm and before 4:00pm.
+	if strings.HasPrefix(receipt.PurchaseTime, "14") || strings.HasPrefix(receipt.PurchaseTime, "15") || strings.HasPrefix(receipt.PurchaseTime, "16") {
+		totalPoints += 10
+	}
 
 	return totalPoints
 }
@@ -108,7 +135,6 @@ func poolReceiptPoints(receipt Receipt) int {
  ************************  Endpoints  ************************
  *************************************************************/
 
-// processes a receipt JSON object that's passed to this endpoint via POST
 // returns JSON object with id of receipt --> { id: "RECEIPT_ID" }
 func postReceipt(res http.ResponseWriter, req *http.Request) {
 	receiptId := uuid.New().String()
@@ -125,9 +151,6 @@ func postReceipt(res http.ResponseWriter, req *http.Request) {
 	checkValidity := isReceiptPostDataValid(r)
 
 	if checkValidity.IsValid {
-		// start to parse the JSON body and add up points
-		// at the end I need to add a new entry to the "inMemoryReceipts" map using the id generated aboce and the points generated here
-		fmt.Println("\nThis IS valid data")
 		receiptPoints := poolReceiptPoints(r)
 
 		// store the points for this receipt along with the id of the receipt in memory
@@ -145,8 +168,7 @@ func postReceipt(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
-// get's a stored receipt object using the receipt id passed to this endpoint via GET
-// returns an object that has the points for the fetched receipt --> { points: RECEIPT_POINTS_AS_INTEGER }
+// returns an object that has the points for the fetched receipt --> { points: "RECEIPT_POINTS" }
 func getReceiptPoints(res http.ResponseWriter, req *http.Request) {
 	pathVars := mux.Vars(req)
 	id, ok := pathVars["id"]
@@ -174,7 +196,6 @@ func getReceiptPoints(res http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
-	// mux := http.NewServeMux()
 	r := mux.NewRouter()
 
 	// POST endpoint
