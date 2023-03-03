@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM golang:1.20.1-bullseye
+FROM golang:1.20.1
 
 # Create working directory for receipt API
 WORKDIR /app
@@ -14,6 +14,7 @@ RUN go mod download
 
 # Copy source code into the Docker image
 COPY *.go ./
+# COPY *.go ./receiptstructs/
 
 # Compile the Go API application
 RUN go build -o /fetch-receipt-api
