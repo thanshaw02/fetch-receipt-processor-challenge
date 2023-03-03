@@ -8,16 +8,12 @@ import (
 	"github.com/gorilla/mux"
 	"io"
 	"math"
-	// "net"
 	"net/http"
 	"reflect"
 	"strconv"
 	"strings"
-
 	"github.com/google/uuid"
 )
-
-const keyServerAddr = "fetch-receipt-server-address"
 
 // key: receipt id, value: receipt score
 var inMemoryReceipts = make(map[string]int)
@@ -77,29 +73,55 @@ func isReceiptPostDataValid(receipt Receipt) IsValidReceiptType {
 
 // calculates the total points for the given receipt
 func poolReceiptPoints(receipt Receipt) int {
+	// One point for every alphanumeric character in the retailer name.
 	totalPoints := len(receipt.Retailer)
+	// fmt.Printf("\nRetailer name points: %v\n", totalPoints) // debugging
 
-	if strings.Contains(receipt.Total, ".") {
+	// 50 points if the total is a round dollar amount with no cents.
+	centsOfTotal := string(receipt.Total[len(receipt.Total) - 2:])
+	if centsOfTotal == "00" {
 		totalPoints += 50
+		// fmt.Printf("\nReceipt total is even number (no change): %v\n", totalPoints) // debugging
 	}
 
+	// 25 points if the total is a multiple of 0.25
 	vertedTotal, _ := strconv.ParseFloat(receipt.Total, 64)
 	if math.Mod(vertedTotal, 0.25) == 0 {
 		totalPoints += 25
+		// fmt.Printf("\nReceipt total is a multiple of 0.25: %v\n", totalPoints) // debugging
 	}
 
+	// 5 points for every two items on the receipt.
 	totalPoints += 5 * (len(receipt.Items) / 2)
+	// fmt.Printf("\nReceipt items length is a multiple of 2: %v\n", totalPoints) // debugging
 
 	// If the trimmed length of the item description is a multiple of 3, multiply the price by 0.2 and round up to the nearest integer. The result is the number of points earned.
+	items := receipt.Items
+	fmt.Println("\nParsing receipt item names")
+	for _, item := range items {
+		trimmedItemName := strings.Trim(item.ShortDescription, " ")
+		trimmedNameLength := len(trimmedItemName)
+		if math.Mod(float64(trimmedNameLength), 3) == 0 {
+			itemPrice, _ := strconv.ParseFloat(item.Price, 64)
+			pointsEarned := int(math.Ceil(itemPrice * 0.2))
+			totalPoints += pointsEarned
+			// fmt.Printf("Trimmed length of item name is a multiple of three: %v\n", totalPoints) // debugging
+		}
+	}
 
+	// 6 points if the day in the purchase date is odd.
 	foo := string(receipt.PurchaseDate[len(receipt.PurchaseDate) - 2:])
 	purchaseDay, _ := strconv.Atoi(foo)
-	fmt.Println("\nExtracted purchase day:", purchaseDay) // debugging
 	if purchaseDay % 2 != 0 {
 		totalPoints += 6
+		// fmt.Printf("\nReceipt purchase day is odd: %v\n", totalPoints) // debugging
 	}
 
 	// 10 points if the time of purchase is after 2:00pm and before 4:00pm.
+	if strings.HasPrefix(receipt.PurchaseTime, "14") || strings.HasPrefix(receipt.PurchaseTime, "15") || strings.HasPrefix(receipt.PurchaseTime, "16") {
+		totalPoints += 10
+		// fmt.Printf("\nReceipt purchase time is between 2 and 4 PM: %v\n", totalPoints) // debugging
+	}
 
 	return totalPoints
 }
