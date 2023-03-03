@@ -18,11 +18,6 @@ type IsValidReceiptType struct {
 	InvalidReason string
 }
 
-type ReceiptError struct {
-	ErrorType    string
-	ErrorMessage string
-}
-
 type PostResponse struct {
 	Id string `json:"id"`
 }
