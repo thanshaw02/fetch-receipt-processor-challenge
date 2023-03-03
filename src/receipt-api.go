@@ -5,11 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"math"
 	"net/http"
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
 	"unicode"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
@@ -38,6 +40,11 @@ type Receipt struct {
 type IsValidReceiptType struct {
 	IsValid bool
 	InvalidReason string
+}
+
+type ReceiptError struct {
+	ErrorType string
+	ErrorMessage string
 }
 
 type PostResponse struct {
@@ -81,17 +88,30 @@ func countAlphanumericCharacters(str string) int {
 	return count
 }
 
+func countItemDescriptionLength(items []Item) int {
+	var count int
+	for _, item := range items {
+		trimmedItemName := strings.Trim(item.ShortDescription, " ")
+		trimmedNameLength := len(trimmedItemName)
+		if math.Mod(float64(trimmedNameLength), 3) == 0 {
+			itemPrice, _ := strconv.ParseFloat(item.Price, 64)
+			pointsEarned := int(math.Ceil(itemPrice * 0.2))
+			count += pointsEarned
+		}
+	}
+	return count
+}
+
 // calculates the total points for the given receipt
+// return value of -1 means an error has occured
 func poolReceiptPoints(receipt Receipt) int {
 	// One point for every alphanumeric character in the retailer name.
 	totalPoints := countAlphanumericCharacters(receipt.Retailer)
-	fmt.Printf("\nRetailer name points: %v\n", totalPoints) // debugging
 
 	// 50 points if the total is a round dollar amount with no cents.
 	centsOfTotal := string(receipt.Total[len(receipt.Total) - 2:])
 	if centsOfTotal == "00" {
 		totalPoints += 50
-		fmt.Printf("\nReceipt total is even number (no change): %v\n", totalPoints) // debugging
 	}
 
 	// 25 points if the total is a multiple of 0.25
@@ -104,27 +124,30 @@ func poolReceiptPoints(receipt Receipt) int {
 	totalPoints += 5 * (len(receipt.Items) / 2)
 
 	// If the trimmed length of the item description is a multiple of 3, multiply the price by 0.2 and round up to the nearest integer. The result is the number of points earned.
-	items := receipt.Items
-	fmt.Println("\nParsing receipt item names")
-	for _, item := range items {
-		trimmedItemName := strings.Trim(item.ShortDescription, " ")
-		trimmedNameLength := len(trimmedItemName)
-		if math.Mod(float64(trimmedNameLength), 3) == 0 {
-			itemPrice, _ := strconv.ParseFloat(item.Price, 64)
-			pointsEarned := int(math.Ceil(itemPrice * 0.2))
-			totalPoints += pointsEarned
-		}
-	}
+	totalPoints += countItemDescriptionLength(receipt.Items)
 
 	// 6 points if the day in the purchase date is odd.
-	foo := string(receipt.PurchaseDate[len(receipt.PurchaseDate) - 2:])
-	purchaseDay, _ := strconv.Atoi(foo)
-	if purchaseDay % 2 != 0 {
-		totalPoints += 6
+	purchaseDate, err := time.Parse("2006-01-02", receipt.PurchaseDate)
+	if err != nil {
+		log.Printf("[ poolReceiptPoints: error parsing receipt purchase date \"%s\": %s ]\n", receipt.PurchaseDate, err)
+		return -1
+	}
+	_purchaseDay := purchaseDate.Day()
+	if _purchaseDay % 2 != 0 {
+		totalPoints += 6 
 	}
 
 	// 10 points if the time of purchase is after 2:00pm and before 4:00pm.
-	if strings.HasPrefix(receipt.PurchaseTime, "14") || strings.HasPrefix(receipt.PurchaseTime, "15") || strings.HasPrefix(receipt.PurchaseTime, "16") {
+	_purchaseTime, err := time.Parse("04:05", receipt.PurchaseTime)
+	if err != nil {
+		log.Printf("[ poolReceiptPoints: error parsing receipt purchase time \"%s\": %s ]\n", receipt.PurchaseTime, err)
+		return -1
+	}
+
+	// this is a little hacky, couldn't quite get the 24-hour time format I needed
+	// so instead the "minute" represents the hour here and the "second" represents the minute here
+	purchaseTimeHour := _purchaseTime.Minute()
+	if purchaseTimeHour >= 14 && purchaseTimeHour <= 16 {
 		totalPoints += 10
 	}
 
@@ -141,9 +164,10 @@ func postReceipt(res http.ResponseWriter, req *http.Request) {
 
 	rawReceipt, err := io.ReadAll(req.Body)
 	if err != nil {
-		fmt.Printf("could not read request body: %s\n", err)
-		// need to come up with a better/more desctriptive response here
+		log.Printf("[ postReceipt: error reading request body -- %s ]\n", err)
+		res.Header().Set("x-request-body-error", err.Error())
 		res.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
 	var r Receipt
@@ -163,6 +187,7 @@ func postReceipt(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(http.StatusOK)
 		res.Write(data)
 	} else {
+		log.Printf("[ postReceipt: receipt json is missing field \"%s\" ]\n", checkValidity.InvalidReason)
 		res.Header().Set("x-missing-field", checkValidity.InvalidReason)
 		res.WriteHeader(http.StatusBadRequest)
 	}
@@ -173,24 +198,30 @@ func getReceiptPoints(res http.ResponseWriter, req *http.Request) {
 	pathVars := mux.Vars(req)
 	id, ok := pathVars["id"]
 	if !ok {
-		// need to come up with a better/more desctriptive response here
-		// actually, I think this means that "id" was not found in the path, which is bad, but then this path wouldn't be hit, right?
+		// in theory this never should be hit i think
+		log.Println("[ getReceiptPoints: error in GET path -- missing required receipt id ]")
+		res.Header().Set("x-missing-filed", "\"id\" in path")
+		res.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	
+	receiptPointsById, ok := inMemoryReceipts[id]
+	if !ok {
+		log.Printf("[ getReceiptPoints: receipt does not exist in in-memory map with id \"%s\" ] \n", id)
+		res.Header().Set("x-receipt-not-exist", id)
 		res.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	receiptPointsById := fmt.Sprint(inMemoryReceipts[id])
-
-	response := GetResponse{
-		Points: receiptPointsById,
-	}
+	response := GetResponse{ Points: fmt.Sprint(receiptPointsById) }
 	data, err := json.Marshal(response)
 	if err != nil {
-		fmt.Printf("Error JSONifying receipt points by id: %s", err)
+		log.Printf("[ getReceiptPoints: error JSONifying receipt points with id \"%s\" ]\n", err)
+		res.Header().Set("x-json-parse-error", err.Error())
 		res.WriteHeader(http.StatusBadRequest)
 		return
 	}
-
+	
 	res.WriteHeader(http.StatusOK)
 	res.Write(data)
 }
@@ -206,8 +237,8 @@ func main() {
 	
 	err := http.ListenAndServe("localhost:3000", r)
 	if errors.Is(err, http.ErrServerClosed) {
-		fmt.Printf("server has be closed\n")
+		log.Printf("[ main: server has be closed ]\n")
 	} else if err != nil {
-		fmt.Printf("error listening for server: %s", err)
+		log.Printf("[ main: error listening on server: %s ]\n", err)
 	}
 }
