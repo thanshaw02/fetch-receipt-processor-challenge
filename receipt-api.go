@@ -43,6 +43,7 @@ func postReceipt(res http.ResponseWriter, req *http.Request) {
 		data, _ := json.Marshal(response)
 		res.WriteHeader(http.StatusOK)
 		res.Write(data)
+		log.Println("[ postReceipt: successfully created and stored receipt, returning receipt id ]")
 	} else {
 		log.Printf("[ postReceipt: receipt json is missing field \"%s\" ]\n", checkValidity.InvalidReason)
 		res.Header().Set("x-missing-field", checkValidity.InvalidReason)
@@ -79,6 +80,7 @@ func getReceiptPoints(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	log.Println("[ getReceiptPoints: successfully fetched receipt, returning receipt points ]")
 	res.WriteHeader(http.StatusOK)
 	res.Write(data)
 }
@@ -92,7 +94,7 @@ func main() {
 	// GET endpoint
 	r.HandleFunc("/fetch-api/receipts/{id}/points", getReceiptPoints)
 
-	err := http.ListenAndServe("localhost:3000", r)
+	err := http.ListenAndServe(":3000", r)
 	if errors.Is(err, http.ErrServerClosed) {
 		log.Printf("[ main: server has be closed ]\n")
 	} else if err != nil {

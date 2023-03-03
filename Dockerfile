@@ -9,12 +9,15 @@ WORKDIR /app
 COPY go.mod ./
 COPY go.sum ./
 
+# Move to "receiptstructs" directory and copy the package in there
+WORKDIR /app/receiptstructs
+COPY . .
+
 # Download all dependencies needed now that the image has our .mod and .sum files
 RUN go mod download
 
 # Copy source code into the Docker image
 COPY *.go ./
-# COPY *.go ./receiptstructs/
 
 # Compile the Go API application
 RUN go build -o /fetch-receipt-api
