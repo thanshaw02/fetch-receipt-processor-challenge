@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 	"io"
 	"log"
 	"net/http"
-	"github.com/google/uuid"
-	"github.com/gorilla/mux"
 	"receipt_api/receiptstructs"
 )
 
@@ -43,6 +43,7 @@ func postReceipt(res http.ResponseWriter, req *http.Request) {
 		data, _ := json.Marshal(response)
 		res.WriteHeader(http.StatusOK)
 		res.Write(data)
+		log.Println("[ postReceipt: successfully created and stored receipt, returning receipt id ]")
 	} else {
 		log.Printf("[ postReceipt: receipt json is missing field \"%s\" ]\n", checkValidity.InvalidReason)
 		res.Header().Set("x-missing-field", checkValidity.InvalidReason)
@@ -61,7 +62,7 @@ func getReceiptPoints(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	
+
 	receiptPointsById, ok := inMemoryReceipts[id]
 	if !ok {
 		log.Printf("[ getReceiptPoints: receipt does not exist in in-memory map with id \"%s\" ] \n", id)
@@ -70,7 +71,7 @@ func getReceiptPoints(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	response := receiptstructs.GetResponse{ Points: fmt.Sprint(receiptPointsById) }
+	response := receiptstructs.GetResponse{Points: fmt.Sprint(receiptPointsById)}
 	data, err := json.Marshal(response)
 	if err != nil {
 		log.Printf("[ getReceiptPoints: error JSONifying receipt points with id \"%s\" ]\n", err)
@@ -78,7 +79,8 @@ func getReceiptPoints(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	
+
+	log.Println("[ getReceiptPoints: successfully fetched receipt, returning receipt points ]")
 	res.WriteHeader(http.StatusOK)
 	res.Write(data)
 }
@@ -91,8 +93,8 @@ func main() {
 
 	// GET endpoint
 	r.HandleFunc("/fetch-api/receipts/{id}/points", getReceiptPoints)
-	
-	err := http.ListenAndServe("localhost:3000", r)
+
+	err := http.ListenAndServe(":3000", r)
 	if errors.Is(err, http.ErrServerClosed) {
 		log.Printf("[ main: server has be closed ]\n")
 	} else if err != nil {

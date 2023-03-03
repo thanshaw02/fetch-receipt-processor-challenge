@@ -1,25 +1,25 @@
 package receiptstructs
 
- type Item struct {
+type Item struct {
 	ShortDescription string
-	Price string
+	Price            string
 }
 
 type Receipt struct {
-	Retailer string
+	Retailer     string
 	PurchaseDate string
 	PurchaseTime string
-	Items []Item
-	Total string
+	Items        []Item
+	Total        string
 }
 
 type IsValidReceiptType struct {
-	IsValid bool
+	IsValid       bool
 	InvalidReason string
 }
 
 type ReceiptError struct {
-	ErrorType string
+	ErrorType    string
 	ErrorMessage string
 }
 

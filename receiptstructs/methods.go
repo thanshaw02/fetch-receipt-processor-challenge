@@ -16,7 +16,7 @@ func IsReceiptPostDataValid(receipt Receipt) IsValidReceiptType {
 	var ret IsValidReceiptType
 	receiptValues := reflect.ValueOf(receipt)
 	types := receiptValues.Type()
-	for i:= 0; i < receiptValues.NumField(); i++ {
+	for i := 0; i < receiptValues.NumField(); i++ {
 		attrValue := fmt.Sprintf("%v", receiptValues.Field(i))
 		if len(attrValue) == 0 {
 			// this attribute is not preset, not valid
@@ -59,7 +59,7 @@ func PoolReceiptPoints(receipt Receipt) int {
 	totalPoints := CountAlphanumericCharacters(receipt.Retailer)
 
 	// 50 points if the total is a round dollar amount with no cents.
-	centsOfTotal := string(receipt.Total[len(receipt.Total) - 2:])
+	centsOfTotal := string(receipt.Total[len(receipt.Total)-2:])
 	if centsOfTotal == "00" {
 		totalPoints += 50
 	}
@@ -83,8 +83,8 @@ func PoolReceiptPoints(receipt Receipt) int {
 		return -1
 	}
 	_purchaseDay := purchaseDate.Day()
-	if _purchaseDay % 2 != 0 {
-		totalPoints += 6 
+	if _purchaseDay%2 != 0 {
+		totalPoints += 6
 	}
 
 	// 10 points if the time of purchase is after 2:00pm and before 4:00pm.
