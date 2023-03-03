@@ -35,7 +35,7 @@ func postReceipt(res http.ResponseWriter, req *http.Request) {
 		res.Header().Set("x-missing-field", err.Error())
 		res.WriteHeader(http.StatusBadRequest)
 	}
-	
+
 	receiptPoints, err := receiptstructs.PoolReceiptPoints(r)
 	if err != nil {
 		log.Printf("[ postReceipt: error collecting pooled receipt points \"%s\" ]\n", err)

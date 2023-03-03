@@ -1,6 +1,7 @@
 package receiptstructs
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"math"
@@ -9,7 +10,6 @@ import (
 	"strings"
 	"time"
 	"unicode"
-	"errors"
 )
 
 // checks if the receipt JSON data sent via POST is valid and isn't missing any required fields
@@ -20,7 +20,7 @@ func IsReceiptPostDataValid(receipt Receipt) error {
 		attrValue := fmt.Sprintf("%v", receiptValues.Field(i))
 		if len(attrValue) == 0 {
 			// this attribute is not preset, not valid
-			return  errors.New(types.Field(i).Name)
+			return errors.New(types.Field(i).Name)
 		}
 	}
 	return nil
