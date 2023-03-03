@@ -13,16 +13,6 @@ type Receipt struct {
 	Total        string
 }
 
-type IsValidReceiptType struct {
-	IsValid       bool
-	InvalidReason string
-}
-
-type ReceiptError struct {
-	ErrorType    string
-	ErrorMessage string
-}
-
 type PostResponse struct {
 	Id string `json:"id"`
 }

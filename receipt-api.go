@@ -29,26 +29,34 @@ func postReceipt(res http.ResponseWriter, req *http.Request) {
 
 	var r receiptstructs.Receipt
 	json.Unmarshal(rawReceipt, &r)
-	checkValidity := receiptstructs.IsReceiptPostDataValid(r)
-
-	if checkValidity.IsValid {
-		receiptPoints := receiptstructs.PoolReceiptPoints(r)
-
-		// store the points for this receipt along with the id of the receipt in memory
-		inMemoryReceipts[receiptId] = receiptPoints
-		response := receiptstructs.PostResponse{
-			Id: receiptId,
-		}
-
-		data, _ := json.Marshal(response)
-		res.WriteHeader(http.StatusOK)
-		res.Write(data)
-		log.Println("[ postReceipt: successfully created and stored receipt, returning receipt id ]")
-	} else {
-		log.Printf("[ postReceipt: receipt json is missing field \"%s\" ]\n", checkValidity.InvalidReason)
-		res.Header().Set("x-missing-field", checkValidity.InvalidReason)
+	err = receiptstructs.IsReceiptPostDataValid(r)
+	if err != nil {
+		log.Printf("[ postReceipt: receipt json is missing field \"%s\" ]\n", err)
+		res.Header().Set("x-missing-field", err.Error())
 		res.WriteHeader(http.StatusBadRequest)
 	}
+
+	receiptPoints, err := receiptstructs.PoolReceiptPoints(r)
+	if err != nil {
+		log.Printf("[ postReceipt: error collecting pooled receipt points \"%s\" ]\n", err)
+		res.Header().Set("x-date-time-parse-error", err.Error())
+		res.WriteHeader(http.StatusBadRequest)
+	}
+
+	// store the points for this receipt along with the id of the receipt in memory
+	inMemoryReceipts[receiptId] = receiptPoints
+	response := receiptstructs.PostResponse{
+		Id: receiptId,
+	}
+
+	data, err := json.Marshal(response)
+	if err != nil {
+		log.Printf("[ postReceipt: error marsheling response data \"%s\" ]\n", err)
+	}
+
+	res.WriteHeader(http.StatusOK)
+	res.Write(data)
+	log.Println("[ postReceipt: successfully created and stored receipt, returning receipt id ]")
 }
 
 // returns an object that has the points for the fetched receipt --> { points: "RECEIPT_POINTS" }
