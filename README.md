@@ -81,3 +81,7 @@ This assignment was a **lot** of fun, prior to this I had not worked closely wit
 I'd really like to re-work or fully flesh out the error handling here, give more specific status codes when an error is thrown or just in general, I'd also like to modulize the project even more and split it up so the structure/file structure is more organized and intuitive. I'm also doing a sort of _hacky_ thing in the `PoolReceiptPoints` method when it comes to extracting the time from the _purchaseTime_ attribute of the receipt. I couldn't quite get the time formatting working how I wanted it to, but I was able to format it in a way where I could extract the hour and minute, but currently the hour I'm extracting is stored as the _minute_ attribute of the `time.Time` object.
 
 It also took me a little while to get used to the upper vs. lowercase rule surrounding methods, objects, and object attributes. I'm still trying to work in the muscle memory for remembering to capitalize methods and attribute names if I want to export and use them in other areas of the codebase, that's isn't a big deal though.
+
+# Helpful Links/Rules
+
+- [This link includes the rules around how points are accrued for a given _Receipt_ object](https://github.com/fetch-rewards/receipt-processor-challenge#rules)
