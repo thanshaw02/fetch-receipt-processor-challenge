@@ -52,6 +52,8 @@ func postReceipt(res http.ResponseWriter, req *http.Request) {
 	data, err := json.Marshal(response)
 	if err != nil {
 		log.Printf("[ postReceipt: error marsheling response data \"%s\" ]\n", err)
+		res.Header().Set("x-json-parse-error", err.Error())
+		res.WriteHeader(http.StatusBadRequest)
 	}
 
 	res.WriteHeader(http.StatusOK)
@@ -82,7 +84,7 @@ func getReceiptPoints(res http.ResponseWriter, req *http.Request) {
 	response := receiptstructs.GetResponse{Points: fmt.Sprint(receiptPointsById)}
 	data, err := json.Marshal(response)
 	if err != nil {
-		log.Printf("[ getReceiptPoints: error JSONifying receipt points with id \"%s\" ]\n", err)
+		log.Printf("[ getReceiptPoints: error marsheling receipt points with id \"%s\" ]\n", err)
 		res.Header().Set("x-json-parse-error", err.Error())
 		res.WriteHeader(http.StatusBadRequest)
 		return
