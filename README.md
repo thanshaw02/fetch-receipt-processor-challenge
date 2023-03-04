@@ -2,11 +2,11 @@
 
 This repository holds my source code for a take-home exam for _Fetch Rewards_, this assignment runs a server using _Go_ and adds to endpoints to this server to:
 
-1. Send a _Receipt_ JSON object to the `/fetch-api/receipts/process` POST endpoint which parses the receipt object and pools up points given a point ruleset via the assignment instructions
+1. Send a _Receipt_ JSON object to the `/receipts/process` POST endpoint which parses the receipt object and pools up points given a point ruleset via the assignment instructions
     - This endpoint returns a JSON object containing the _ID_ of the receipt that was submitted which is used to reference later in the GET endpoint.
     - Errors are also handled for missing attributes in the POST's JSON body, errors parsing the _date_ and _time_ attributes, and other internal server errors that may occur.
     - When an error happens I try to send some data back to the client informing them of what went wrong, this includes setting headers with information as well as the correct status codes.
-2. Fetch the points associated with a submitted _Receipt_ from the `/fetch-api/receipts/{id}/points` endpoint using the id returned from hitting the POST endpoint above. This endpoint returns a JSON object that contains the total pooled points that the receipt submitted earlier accrued.
+2. Fetch the points associated with a submitted _Receipt_ from the `/receipts/{id}/points` endpoint using the id returned from hitting the POST endpoint above. This endpoint returns a JSON object that contains the total pooled points that the receipt submitted earlier accrued.
     - Errors are also handled here, including if the id sent via the endpoint's path doesn't match an entry in the _in-memory store/map of receipts_
 
 ## How to run the Receipt API server using Docker
@@ -31,7 +31,7 @@ This repository holds my source code for a take-home exam for _Fetch Rewards_, t
 
 ## How to run the Receipt API server without Docker
 
-1. Within the _fetch-receipt-processor-challenge_ directory simply run this command `go run receipt-api.di`
+1. Within the _fetch-receipt-processor-challenge_ directory simply run this command `go run receipt-api.go`
 
 **Go Notes:**
 - This assumed you have _Go_ installed and configured on your machine
@@ -41,22 +41,22 @@ This repository holds my source code for a take-home exam for _Fetch Rewards_, t
 
 **Note:** At the time of writing this I haven't included the frontend aspect whichw ill allow you to test API from your browser rather than using `curl`, if/when I add the frontend I will update this README to reflect that change
 
-1. From your console run this `curl` command to hit the `/fetch-api/receipts/process` POST endpoint:
+1. From your console run this `curl` command to hit the `/receipts/process` POST endpoint:
     - This command specifically holds the same _Receipt_ data used in _example one_ of the assignment
     - **Note:** This command uses the _verbose_ option so you can see everything sent back
 
-> curl -v -d '{"retailer": "Target", "purchaseDate": "2022-01-01", "purchaseTime": "13:01", "items": [{"shortDescription": "Mountain Dew 12PK", "price": "6.49"}, {"shortDescription": "Emils Cheese Pizza", "price": "12.25"}, {"shortDescription": "Knorr Creamy Chicken", "price": "1.26"}, {"shortDescription": "Doritos Nacho Cheese", "price": "3.35"}, {"shortDescription": "   Klarbrunn 12-PK 12 FL OZ  ", "price": "12.00"}], "total": "35.35"}' -X POST 'http://localhost:3000/fetch-api/receipts/process'
+> curl -v -d '{"retailer": "Target", "purchaseDate": "2022-01-01", "purchaseTime": "13:01", "items": [{"shortDescription": "Mountain Dew 12PK", "price": "6.49"}, {"shortDescription": "Emils Cheese Pizza", "price": "12.25"}, {"shortDescription": "Knorr Creamy Chicken", "price": "1.26"}, {"shortDescription": "Doritos Nacho Cheese", "price": "3.35"}, {"shortDescription": "   Klarbrunn 12-PK 12 FL OZ  ", "price": "12.00"}], "total": "35.35"}' -X POST 'http://localhost:3000/receipts/process'
 
 2. Verify you are sent back a JSON object that follows this format below:
 
 > { "id" : "1c23395b-7b6e-47bf-887c-f8e7608c809c" }
 
-3. Copy the _uuid_, this will be used to hit the `/fetch-api/receipts/{id}/points` GET endpoint
+3. Copy the _uuid_, this will be used to hit the `/receipts/{id}/points` GET endpoint
 
-4. From the console run this `curl` command to hit the `/fetch-api/receipts/{id}/points` endpoint using the id received from the previous POST request:
+4. From the console run this `curl` command to hit the `/receipts/{id}/points` endpoint using the id received from the previous POST request:
     - **Note:** The _uuid_ between _receipts_ and _points_ in this path must be the id from earlier
 
-> curl -v -X GET 'http://localhost:3000/fetch-api/receipts/1c23395b-7b6e-47bf-887c-f8e7608c809c/points'
+> curl -v -X GET 'http://localhost:3000/receipts/1c23395b-7b6e-47bf-887c-f8e7608c809c/points'
 
 5. Verify you are sent back a JSON object that follows this format below:
 
@@ -68,7 +68,7 @@ This repository holds my source code for a take-home exam for _Fetch Rewards_, t
 
 I will include another POST curl command that represents _example two_ from the assignment, this receipt should accrue `109` points -- so verify this is what you see after sending your GET request.
 
-> curl -v -d '{"retailer": "M&M Corner Market", "purchaseDate": "2022-03-20", "purchaseTime": "14:33", "items": [{"shortDescription": "Gatorade", "price": "2.25"}, {"shortDescription": "Gatorade", "price": "2.25"}, {"shortDescription": "Gatorade", "price": "2.25"}, {"shortDescription": "Gatorade", "price": "2.25"}], "total": "9.00"}' -X POST 'http://127.0.0.1:3000/fetch-api/receipts/process'
+> curl -v -d '{"retailer": "M&M Corner Market", "purchaseDate": "2022-03-20", "purchaseTime": "14:33", "items": [{"shortDescription": "Gatorade", "price": "2.25"}, {"shortDescription": "Gatorade", "price": "2.25"}, {"shortDescription": "Gatorade", "price": "2.25"}, {"shortDescription": "Gatorade", "price": "2.25"}], "total": "9.00"}' -X POST 'http://127.0.0.1:3000/receipts/process'
 
 Use the same GET `curl` command from the above section using the new id -- verify that `109` points are returned.
 
