@@ -39,7 +39,7 @@ This repository holds my source code for a take-home exam for _Fetch Rewards_, t
 
 # How to test the Receipt API
 
-**Note:** At the time of writing this I haven't included the frontend aspect whichw ill allow you to test API from your browser rather than using `curl`, if/when I add the frontend I will update this README to reflect that change
+**Note:** At the time of writing this I haven't included the frontend aspect which will allow you to test API from your browser rather than using `curl`, if/when I add the frontend I will update this README to reflect that change
 
 1. From your console run this `curl` command to hit the `/fetch-api/receipts/process` POST endpoint:
     - This command specifically holds the same _Receipt_ data used in _example one_ of the assignment
