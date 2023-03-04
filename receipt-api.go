@@ -90,9 +90,9 @@ func getReceiptPoints(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	log.Println("[ getReceiptPoints: successfully fetched receipt, returning receipt points ]")
 	res.WriteHeader(http.StatusOK)
 	res.Write(data)
+	log.Println("[ getReceiptPoints: successfully fetched receipt, returning receipt points ]")
 }
 
 func main() {
