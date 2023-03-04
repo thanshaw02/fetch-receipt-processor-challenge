@@ -97,10 +97,10 @@ func main() {
 	r := mux.NewRouter()
 
 	// POST endpoint
-	r.HandleFunc("/fetch-api/receipts/process", postReceipt)
+	r.HandleFunc("/receipts/process", postReceipt)
 
 	// GET endpoint
-	r.HandleFunc("/fetch-api/receipts/{id}/points", getReceiptPoints)
+	r.HandleFunc("/receipts/{id}/points", getReceiptPoints)
 
 	err := http.ListenAndServe(":3000", r)
 	if errors.Is(err, http.ErrServerClosed) {
