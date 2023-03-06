@@ -6,7 +6,7 @@ type Item struct {
 }
 
 type Receipt struct {
-	Id					 string `json:"id,omitempty"`
+	Id           string `json:"id,omitempty"`
 	Retailer     string
 	PurchaseDate string
 	PurchaseTime string
