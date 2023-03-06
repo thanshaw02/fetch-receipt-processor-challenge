@@ -1,7 +1,12 @@
-import { Box, Button, Grid, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  // Grid,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { FC, useState } from "react";
 import { ReceiptItem } from "../model/receipt";
-
 
 type PurchasedItemProps = {
   onChange?: (item: ReceiptItem) => void;
@@ -12,16 +17,16 @@ type PurchasedItemProps = {
 const PurchasedItem: FC<PurchasedItemProps> = ({
   onChange,
   receiptItem,
-  index
+  index,
 }) => {
   const [itemDescription, setItemDescription] = useState<string>("");
   const [itemPrice, setItemPrice] = useState<string>("");
- 
+
   const handleSubmit = () => {
     if (itemDescription && itemPrice) {
       const newItem: ReceiptItem = {
         shortDescription: itemDescription,
-        price: itemPrice
+        price: itemPrice,
       };
 
       if (onChange) {
@@ -46,7 +51,6 @@ const PurchasedItem: FC<PurchasedItemProps> = ({
         name="item-description"
         value={receiptItem?.shortDescription || itemDescription}
         onChange={(e) => setItemDescription(e.target.value)}
-
       />
       <TextField
         disabled={!!receiptItem}

@@ -48,7 +48,7 @@ func postReceipt(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	
+
 	receiptId := uuid.New().String()
 
 	// store the points for this receipt along with the id of the receipt in memory

@@ -1,6 +1,5 @@
 import Receipt, { ReceiptId, ReceiptPoints } from "../model/receipt";
 
-
 const processReceipt = (receipt: Receipt): Promise<ReceiptId> => {
   const requestInfo = {
     method: "POST",
@@ -13,24 +12,38 @@ const processReceipt = (receipt: Receipt): Promise<ReceiptId> => {
   };
 
   return new Promise((resolve, reject) => {
-    fetch("http://localhost:8000/receipts/process", requestInfo).then((response) => {
-      if (!response.ok) reject(`Status code: ${response.status}\nError message: ${response.statusText}`);
-      resolve(response.json());
-    }, reject);
+    fetch("http://localhost:8000/receipts/process", requestInfo).then(
+      (response) => {
+        if (!response.ok)
+          reject(
+            `Status code: ${response.status}\nError message: ${response.statusText}`
+          );
+        resolve(response.json());
+      },
+      reject
+    );
   });
 };
 
-const getReceiptPoints = (receiptId: string): Promise<ReceiptPoints> => {
+const getReceiptPoints = (
+  receiptId: string
+): Promise<ReceiptPoints> => {
   const requestInfo = {
     method: "GET",
     headers: {
-      Accept: "application/json"
+      Accept: "application/json",
     },
   };
 
   return new Promise((resolve, reject) => {
-    fetch(`http://localhost:8000/receipts/${receiptId}/points`, requestInfo).then((response) => {
-      if (!response.ok) reject(`Status code: ${response.status}\nError message: ${response.statusText}`);
+    fetch(
+      `http://localhost:8000/receipts/${receiptId}/points`,
+      requestInfo
+    ).then((response) => {
+      if (!response.ok)
+        reject(
+          `Status code: ${response.status}\nError message: ${response.statusText}`
+        );
       resolve(response.json());
     }, reject);
   });
@@ -38,7 +51,7 @@ const getReceiptPoints = (receiptId: string): Promise<ReceiptPoints> => {
 
 const FetchRewards = {
   processReceipt,
-  getReceiptPoints
+  getReceiptPoints,
 };
 
 export default FetchRewards;

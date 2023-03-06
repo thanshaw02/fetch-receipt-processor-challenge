@@ -1,19 +1,29 @@
-import { FC, useState } from 'react';
-import { Alert, Box, Button, Grid, Paper, TextField, Typography } from '@mui/material';
-import AddPurchasedItemComponent from './AddPurchasedItemComponent';
-import Receipt, { ReceiptItem } from '../model/receipt';
-import FetchRewards from '../api/fetchRewards';
+import { FC, useState } from "react";
+import {
+  Alert,
+  Box,
+  Button,
+  Grid,
+  Paper,
+  TextField,
+  Typography,
+} from "@mui/material";
+import AddPurchasedItemComponent from "./AddPurchasedItemComponent";
+import Receipt, { ReceiptItem } from "../model/receipt";
+import FetchRewards from "../api/fetchRewards";
 
 const App: FC<unknown> = () => {
   const [error, setError] = useState<string>("");
 
-  const [receiptItems, setReceiptItems] = useState<Array<ReceiptItem>>([]);
+  const [receiptItems, setReceiptItems] = useState<
+    Array<ReceiptItem>
+  >([]);
 
   const submitForm = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError("");
     const formData = new FormData(event.currentTarget);
-    
+
     console.log(`Receipt items:\n${JSON.stringify(receiptItems)}`);
 
     const retailerName = formData.get("retailer-name");
@@ -51,13 +61,15 @@ const App: FC<unknown> = () => {
       purchaseDate: purchaseDate.toString(),
       purchaseTime: purchaseTime.toString(),
       items: receiptItems,
-      total: total.toString()
+      total: total.toString(),
     };
-    
+
     // console.log(`Receipt object:\n${JSON.stringify(newReceipt)}`);
     FetchRewards.processReceipt(newReceipt).then(
       (receiptId) => {
-        console.log(`Receipt processed successfully -- id: ${receiptId.id}`);
+        console.log(
+          `Receipt processed successfully -- id: ${receiptId.id}`
+        );
       },
       (err) => {
         console.error(err);
@@ -96,11 +108,7 @@ const App: FC<unknown> = () => {
           {/* error snackbar */}
           {error && (
             <Grid item xs={12}>
-              <Alert
-                severity="error"
-              >
-                {error}
-              </Alert>
+              <Alert severity="error">{error}</Alert>
             </Grid>
           )}
 
@@ -138,7 +146,7 @@ const App: FC<unknown> = () => {
           </Grid>
 
           {/* items purchased field */}
-          <AddPurchasedItemComponent 
+          <AddPurchasedItemComponent
             onChange={(receiptItems) => setReceiptItems(receiptItems)}
           />
 
