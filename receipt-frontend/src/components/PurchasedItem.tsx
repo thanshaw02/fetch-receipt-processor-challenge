@@ -1,55 +1,71 @@
-import { Box, TextField, Typography } from "@mui/material";
+import { Button, TextField, Typography } from "@mui/material";
 import { FC, useState } from "react";
 import { ReceiptItem } from "../model/receipt";
 
 
 type PurchasedItemProps = {
+  onChange?: (item: ReceiptItem) => void;
   receiptItem?: ReceiptItem;
 };
 
 const PurchasedItem: FC<PurchasedItemProps> = ({
+  onChange,
   receiptItem
 }) => {
-  const [item, setItem] = useState<ReceiptItem | undefined>(receiptItem);
+  const [itemDescription, setItemDescription] = useState<string>("");
+  const [itemPrice, setItemPrice] = useState<string>("");
+ 
+  const handleSubmit = () => {
+    if (itemDescription && itemPrice) {
+      const newItem: ReceiptItem = {
+        shortDescription: itemDescription,
+        price: itemPrice
+      };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-
-    const itemDescription = formData.get("item-description");
-    if (!itemDescription) {
-      // do some error sutff
-    }
-
-    const itemPrice = formData.get("item-price");
-    if (!itemPrice) {
-      // do some error stuff
+      if (onChange) {
+        onChange(newItem);
+      }
+      setItemDescription("");
+      setItemPrice("");
     }
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit}>
+    <>
       <Typography component="h3" variant="h4">
         Item
       </Typography>
       <TextField
         fullWidth
+        disabled={!!receiptItem}
         size="medium"
         variant="outlined"
         label="Item Description"
         name="item-description"
-        value={item?.shortDescription || ""}
+        value={receiptItem?.shortDescription || itemDescription}
+        onChange={(e) => setItemDescription(e.target.value)}
 
       />
       <TextField
         fullWidth
+        disabled={!!receiptItem}
         size="medium"
         variant="outlined"
         label="Item Price"
         name="item-price"
-        value={item?.price || ""}
+        value={receiptItem?.price || itemPrice}
+        onChange={(e) => setItemPrice(e.target.value)}
       />
-    </Box>
+      {!receiptItem && (
+        <Button
+          fullWidth
+          variant="contained"
+          onClick={handleSubmit}
+        >
+          Add Item
+        </Button>
+      )}
+    </>
   );
 };
 
