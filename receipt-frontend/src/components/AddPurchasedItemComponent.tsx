@@ -26,7 +26,6 @@ const AddPurchasedItemComponent: FC<
         <PurchasedItem
           key={`${item.price}-${item.shortDescription}-${index}`}
           receiptItem={item}
-          index={index + 1}
         />
       ))}
 
