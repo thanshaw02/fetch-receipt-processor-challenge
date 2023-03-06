@@ -15,6 +15,8 @@ import (
 // key: receipt id, value: receipt score
 var inMemoryReceipts = make(map[string]int)
 
+// using a 'wildcard' here, not ideal and will change this either towards the end of this PR (https://github.com/thanshaw02/fetch-receipt-processor-challenge/pull/9)
+// or will change it in a following PR
 func enableCors(res *http.ResponseWriter) {
 	(*res).Header().Set("Access-Control-Allow-Origin", "*")
 }
