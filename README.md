@@ -19,8 +19,8 @@ This repository holds my source code for a take-home exam for _Fetch Rewards_, t
 
 > fetch-receipt-api  ||  latest  ||  27a893d09711  ||  6 seconds ago  ||  851MB
 
-4. Run the docker image using this command from the same directory `docker run -d -p 3000:3000 fetch-receipt-api`
-    - This will start the Docker image connecting the Docker container's port _3000_ to your machine's _3000_ port, this also allows the image to run in the background freeing up your console instead of forcing you to open a new one.
+4. Run the docker image using this command from the same directory `docker run -d -p 8000:8000 fetch-receipt-api`
+    - This will start the Docker image connecting the Docker container's port _8000_ to your machine's _8000_ port, this also allows the image to run in the background freeing up your console instead of forcing you to open a new one.
     - You do not need to specify the host here, although if you prefer to specify _localhost_ or _127.0.0.1_ that will still work.
 
 5. Verify that you see the Docker container running in the _Docker Desktop_ app
@@ -45,7 +45,7 @@ This repository holds my source code for a take-home exam for _Fetch Rewards_, t
     - This command specifically holds the same _Receipt_ data used in _example one_ of the assignment
     - **Note:** This command uses the _verbose_ option so you can see everything sent back
 
-> curl -v -d '{"retailer": "Target", "purchaseDate": "2022-01-01", "purchaseTime": "13:01", "items": [{"shortDescription": "Mountain Dew 12PK", "price": "6.49"}, {"shortDescription": "Emils Cheese Pizza", "price": "12.25"}, {"shortDescription": "Knorr Creamy Chicken", "price": "1.26"}, {"shortDescription": "Doritos Nacho Cheese", "price": "3.35"}, {"shortDescription": "   Klarbrunn 12-PK 12 FL OZ  ", "price": "12.00"}], "total": "35.35"}' -X POST 'http://localhost:3000/receipts/process'
+> curl -v -d '{"retailer": "Target", "purchaseDate": "2022-01-01", "purchaseTime": "13:01", "items": [{"shortDescription": "Mountain Dew 12PK", "price": "6.49"}, {"shortDescription": "Emils Cheese Pizza", "price": "12.25"}, {"shortDescription": "Knorr Creamy Chicken", "price": "1.26"}, {"shortDescription": "Doritos Nacho Cheese", "price": "3.35"}, {"shortDescription": "   Klarbrunn 12-PK 12 FL OZ  ", "price": "12.00"}], "total": "35.35"}' -X POST 'http://localhost:8000/receipts/process'
 
 2. Verify you are sent back a JSON object that follows this format below:
 
@@ -56,7 +56,7 @@ This repository holds my source code for a take-home exam for _Fetch Rewards_, t
 4. From the console run this `curl` command to hit the `/receipts/{id}/points` endpoint using the id received from the previous POST request:
     - **Note:** The _uuid_ between _receipts_ and _points_ in this path must be the id from earlier
 
-> curl -v -X GET 'http://localhost:3000/receipts/1c23395b-7b6e-47bf-887c-f8e7608c809c/points'
+> curl -v -X GET 'http://localhost:8000/receipts/1c23395b-7b6e-47bf-887c-f8e7608c809c/points'
 
 5. Verify you are sent back a JSON object that follows this format below:
 
@@ -68,7 +68,7 @@ This repository holds my source code for a take-home exam for _Fetch Rewards_, t
 
 I will include another POST curl command that represents _example two_ from the assignment, this receipt should accrue `109` points -- so verify this is what you see after sending your GET request.
 
-> curl -v -d '{"retailer": "M&M Corner Market", "purchaseDate": "2022-03-20", "purchaseTime": "14:33", "items": [{"shortDescription": "Gatorade", "price": "2.25"}, {"shortDescription": "Gatorade", "price": "2.25"}, {"shortDescription": "Gatorade", "price": "2.25"}, {"shortDescription": "Gatorade", "price": "2.25"}], "total": "9.00"}' -X POST 'http://127.0.0.1:3000/receipts/process'
+> curl -v -d '{"retailer": "M&M Corner Market", "purchaseDate": "2022-03-20", "purchaseTime": "14:33", "items": [{"shortDescription": "Gatorade", "price": "2.25"}, {"shortDescription": "Gatorade", "price": "2.25"}, {"shortDescription": "Gatorade", "price": "2.25"}, {"shortDescription": "Gatorade", "price": "2.25"}], "total": "9.00"}' -X POST 'http://127.0.0.1:8000/receipts/process'
 
 Use the same GET `curl` command from the above section using the new id -- verify that `109` points are returned.
 
