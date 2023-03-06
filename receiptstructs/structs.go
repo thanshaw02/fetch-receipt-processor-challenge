@@ -6,11 +6,13 @@ type Item struct {
 }
 
 type Receipt struct {
+	Id					 string `json:"id,omitempty"`
 	Retailer     string
 	PurchaseDate string
 	PurchaseTime string
 	Items        []Item
 	Total        string
+	Points       int `json:"points,omitempty"`
 }
 
 type PostResponse struct {
