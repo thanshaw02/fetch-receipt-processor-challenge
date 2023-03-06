@@ -19,7 +19,7 @@ func IsReceiptPostDataValid(receipt Receipt) error {
 	for i := 0; i < receiptValues.NumField(); i++ {
 		attrValue := fmt.Sprintf("%v", receiptValues.Field(i))
 		if len(attrValue) == 0 && (types.Field(i).Name != "Id" && types.Field(i).Name != "Points")  {
-			// this attribute is not preset, not valid
+			// this attribute is not present, not valid
 			return errors.New(types.Field(i).Name)
 		}
 	}
