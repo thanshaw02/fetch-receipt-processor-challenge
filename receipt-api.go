@@ -15,9 +15,13 @@ import (
 // key: receipt id, value: receipt score
 var inMemoryReceipts = make(map[string]int)
 
+func enableCors(res *http.ResponseWriter) {
+	(*res).Header().Set("Access-Control-Allow-Origin", "*")
+}
+
 // returns JSON object with id of receipt --> { id: "RECEIPT_ID" }
 func postReceipt(res http.ResponseWriter, req *http.Request) {
-	receiptId := uuid.New().String()
+	enableCors(&res)
 
 	rawReceipt, err := io.ReadAll(req.Body)
 	if err != nil {
@@ -44,6 +48,8 @@ func postReceipt(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	
+	receiptId := uuid.New().String()
 
 	// store the points for this receipt along with the id of the receipt in memory
 	inMemoryReceipts[receiptId] = receiptPoints
@@ -59,13 +65,15 @@ func postReceipt(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	res.Header().Set("Content-Type", "application/json")
 	res.WriteHeader(http.StatusOK)
 	res.Write(data)
-	log.Println("[ postReceipt: successfully created and stored receipt, returning receipt id ]")
+	log.Printf("[ postReceipt: successfully created and stored receipt, returning receipt id \"%s\" ]\n", receiptId)
 }
 
 // returns an object that has the points for the fetched receipt --> { points: "RECEIPT_POINTS" }
 func getReceiptPoints(res http.ResponseWriter, req *http.Request) {
+	enableCors(&res)
 	pathVars := mux.Vars(req)
 	id, ok := pathVars["id"]
 	if !ok {
