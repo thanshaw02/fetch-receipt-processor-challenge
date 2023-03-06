@@ -107,7 +107,7 @@ func main() {
 	// GET endpoint
 	r.HandleFunc("/receipts/{id}/points", getReceiptPoints)
 
-	err := http.ListenAndServe(":3000", r)
+	err := http.ListenAndServe(":8000", r)
 	if errors.Is(err, http.ErrServerClosed) {
 		log.Printf("[ main: server has be closed ]\n")
 	} else if err != nil {
