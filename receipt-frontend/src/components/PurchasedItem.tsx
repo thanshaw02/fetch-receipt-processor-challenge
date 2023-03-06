@@ -1,4 +1,4 @@
-import { Button, TextField, Typography } from "@mui/material";
+import { Box, Button, Grid, TextField, Typography } from "@mui/material";
 import { FC, useState } from "react";
 import { ReceiptItem } from "../model/receipt";
 
@@ -6,11 +6,13 @@ import { ReceiptItem } from "../model/receipt";
 type PurchasedItemProps = {
   onChange?: (item: ReceiptItem) => void;
   receiptItem?: ReceiptItem;
+  index?: number;
 };
 
 const PurchasedItem: FC<PurchasedItemProps> = ({
   onChange,
-  receiptItem
+  receiptItem,
+  index
 }) => {
   const [itemDescription, setItemDescription] = useState<string>("");
   const [itemPrice, setItemPrice] = useState<string>("");
@@ -31,12 +33,12 @@ const PurchasedItem: FC<PurchasedItemProps> = ({
   };
 
   return (
-    <>
-      <Typography component="h3" variant="h4">
-        Item
+    <Box sx={{ mt: 2 }}>
+      <Typography component="h5" variant="h6">
+        {receiptItem ? receiptItem.shortDescription : "Add Item"}
       </Typography>
       <TextField
-        fullWidth
+        sx={{ mr: 2 }}
         disabled={!!receiptItem}
         size="medium"
         variant="outlined"
@@ -47,7 +49,6 @@ const PurchasedItem: FC<PurchasedItemProps> = ({
 
       />
       <TextField
-        fullWidth
         disabled={!!receiptItem}
         size="medium"
         variant="outlined"
@@ -59,13 +60,14 @@ const PurchasedItem: FC<PurchasedItemProps> = ({
       {!receiptItem && (
         <Button
           fullWidth
+          sx={{ mt: 2 }}
           variant="contained"
           onClick={handleSubmit}
         >
           Add Item
         </Button>
       )}
-    </>
+    </Box>
   );
 };
 

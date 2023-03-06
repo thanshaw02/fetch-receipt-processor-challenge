@@ -1,4 +1,11 @@
 
+export type ReceiptId = {
+  id: string;
+}
+
+export type ReceiptPoints = {
+  points: string;
+}
 
 export type ReceiptItem = {
   shortDescription: string;
