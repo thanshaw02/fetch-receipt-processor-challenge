@@ -24,7 +24,7 @@ const AddPurchasedItemComponent: FC<
       {/* this is where we display the added receipt items */}
       {purchasedItems.map((item, index) => (
         <PurchasedItem
-          key={`${item.price}-${item.shortDescription}-${index}`}
+          key={`${item.price}-${index}`}
           receiptItem={item}
         />
       ))}

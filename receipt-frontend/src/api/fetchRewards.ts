@@ -5,8 +5,6 @@ const processReceipt = (receipt: Receipt): Promise<ReceiptId> => {
     method: "POST",
     headers: {
       Accept: "application/json",
-      // "Access-Control-Allow-Origin": "http://localhost:8000",
-      // "Content-Type": "application/json",
     },
     body: JSON.stringify(receipt),
   };
