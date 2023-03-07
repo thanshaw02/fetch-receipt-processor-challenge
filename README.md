@@ -5,9 +5,12 @@ This repository holds my source code for a take-home exam for _Fetch Rewards_, t
 1. Send a _Receipt_ JSON object to the `/receipts/process` POST endpoint which parses the receipt object and pools up points given a point ruleset via the assignment instructions
     - This endpoint returns a JSON object containing the _ID_ of the receipt that was submitted which is used to reference later in the GET endpoint.
     - Errors are also handled for missing attributes in the POST's JSON body, errors parsing the _date_ and _time_ attributes, and other internal server errors that may occur.
-    - When an error happens I try to send some data back to the client informing them of what went wrong, this includes setting headers with information as well as the correct status codes.
 2. Fetch the points associated with a submitted _Receipt_ from the `/receipts/{id}/points` endpoint using the id returned from hitting the POST endpoint above. This endpoint returns a JSON object that contains the total pooled points that the receipt submitted earlier accrued.
     - Errors are also handled here, including if the id sent via the endpoint's path doesn't match an entry in the _in-memory store/map of receipts_
+
+**Note:**
+- The code that's directly related to this assignment can be found in: `receipt-api.go`, `/receiptstructs/structs.go`, and `/receiptstructs/methods.go`
+- The _frontend_ aspect of this assignment is strictly for testing the Go backend endpoints
 
 ## How to run the Receipt API server using Docker
 
