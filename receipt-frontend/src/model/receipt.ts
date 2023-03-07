@@ -7,6 +7,7 @@ export type ReceiptPoints = {
 };
 
 export type ReceiptItem = {
+  id: string;
   shortDescription: string;
   price: string;
 };

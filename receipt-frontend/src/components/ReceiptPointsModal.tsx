@@ -1,5 +1,5 @@
 import { Box, Divider, Fade, Modal, Typography } from "@mui/material";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import FetchRewards from "../api/fetchRewards";
 import Receipt from "../model/receipt";
 
@@ -31,7 +31,7 @@ const ReceiptPointsModal: FC<ReceiptPointsModalProps> = ({
   const [accruedReceiptPoints, setAccruedReceiptPoints] =
     useState<string>("");
 
-  if (!accruedReceiptPoints) {
+  useEffect(() => {
     FetchRewards.getReceiptPoints(receiptId).then(
       (receiptPoints) => {
         setAccruedReceiptPoints(receiptPoints.points);
@@ -42,7 +42,7 @@ const ReceiptPointsModal: FC<ReceiptPointsModalProps> = ({
         );
       }
     );
-  }
+  }, [receiptId]);
 
   return (
     <>

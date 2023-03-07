@@ -19,6 +19,25 @@ const AddPurchasedItemComponent: FC<
     onChange(updatedArray);
   };
 
+  const handleEditItem = (
+    itemId: string,
+    itemDescription: string,
+    itemPrice: string
+  ) => {
+    const updatedArray = purchasedItems.map((item) => {
+      if (item.id === itemId) {
+        return {
+          id: itemId,
+          shortDescription: itemDescription,
+          price: itemPrice,
+        };
+      }
+      return item;
+    });
+    setPurchasedItems(updatedArray);
+    onChange(updatedArray);
+  };
+
   return (
     <>
       {/* this is where we display the added receipt items */}
@@ -26,11 +45,12 @@ const AddPurchasedItemComponent: FC<
         <PurchasedItem
           key={`${item.price}-${index}`}
           receiptItem={item}
+          handleEditItem={handleEditItem}
         />
       ))}
 
       {/* This is where you can add new receipt items */}
-      <PurchasedItem onChange={handleReceiptItemChange} />
+      <PurchasedItem handleAddItem={handleReceiptItemChange} />
     </>
   );
 };
