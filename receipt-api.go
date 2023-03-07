@@ -12,12 +12,18 @@ import (
 	"receipt_api/receiptstructs"
 )
 
-// key: receipt id, value: receipt score
-var inMemoryReceipts = make(map[string]int)
+// key: receipt id, value: receipt object including points and id
+var inMemoryReceiptMap = make(map[string]receiptstructs.Receipt)
+
+// using a 'wildcard' here, not ideal and will change this either towards the end of this PR (https://github.com/thanshaw02/fetch-receipt-processor-challenge/pull/9)
+// or will change it in a following PR
+func enableCors(res *http.ResponseWriter) {
+	(*res).Header().Set("Access-Control-Allow-Origin", "*")
+}
 
 // returns JSON object with id of receipt --> { id: "RECEIPT_ID" }
 func postReceipt(res http.ResponseWriter, req *http.Request) {
-	receiptId := uuid.New().String()
+	enableCors(&res)
 
 	rawReceipt, err := io.ReadAll(req.Body)
 	if err != nil {
@@ -45,8 +51,13 @@ func postReceipt(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	// generate uuid for receipt
+	receiptId := uuid.New().String()
+
 	// store the points for this receipt along with the id of the receipt in memory
-	inMemoryReceipts[receiptId] = receiptPoints
+	r.Id = receiptId
+	r.Points = receiptPoints
+	inMemoryReceiptMap[receiptId] = r
 	response := receiptstructs.PostResponse{
 		Id: receiptId,
 	}
@@ -59,13 +70,15 @@ func postReceipt(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	res.Header().Set("Content-Type", "application/json")
 	res.WriteHeader(http.StatusOK)
 	res.Write(data)
-	log.Println("[ postReceipt: successfully created and stored receipt, returning receipt id ]")
+	log.Printf("[ postReceipt: successfully created and stored receipt, returning receipt id \"%s\" ]\n", receiptId)
 }
 
 // returns an object that has the points for the fetched receipt --> { points: "RECEIPT_POINTS" }
 func getReceiptPoints(res http.ResponseWriter, req *http.Request) {
+	enableCors(&res)
 	pathVars := mux.Vars(req)
 	id, ok := pathVars["id"]
 	if !ok {
@@ -76,7 +89,7 @@ func getReceiptPoints(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	receiptPointsById, ok := inMemoryReceipts[id]
+	receiptPointsById, ok := inMemoryReceiptMap[id]
 	if !ok {
 		log.Printf("[ getReceiptPoints: receipt does not exist in in-memory map with id \"%s\" ] \n", id)
 		res.Header().Set("x-receipt-not-exist", id)
@@ -84,7 +97,7 @@ func getReceiptPoints(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	response := receiptstructs.GetResponse{Points: fmt.Sprint(receiptPointsById)}
+	response := receiptstructs.GetResponse{Points: fmt.Sprint(receiptPointsById.Points)}
 	data, err := json.Marshal(response)
 	if err != nil {
 		log.Printf("[ getReceiptPoints: error marsheling receipt points with id \"%s\" ]\n", err)
@@ -107,7 +120,7 @@ func main() {
 	// GET endpoint
 	r.HandleFunc("/receipts/{id}/points", getReceiptPoints)
 
-	err := http.ListenAndServe(":3000", r)
+	err := http.ListenAndServe(":8000", r)
 	if errors.Is(err, http.ErrServerClosed) {
 		log.Printf("[ main: server has be closed ]\n")
 	} else if err != nil {
