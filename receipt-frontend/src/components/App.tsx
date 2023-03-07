@@ -18,9 +18,8 @@ import CookieIcon from "@mui/icons-material/Cookie";
 const App: FC<unknown> = () => {
   const [success, setSuccess] = useState<string>("");
   const [error, setError] = useState<string>("");
-  const [receiptItems, setReceiptItems] = useState<
-    Array<ReceiptItem>
-  >([]);
+  const [receiptItems, setReceiptItems] = 
+    useState<Array<ReceiptItem>>([]);
   const [itemsTotalCost, setItemsTotalCost] = useState<string>("");
   const [receiptId, setReceiptId] = useState<string>("");
   const [latestReceipt, setLatestReceipt] = useState<Receipt>();
