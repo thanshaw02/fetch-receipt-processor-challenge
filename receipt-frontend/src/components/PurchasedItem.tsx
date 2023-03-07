@@ -1,6 +1,13 @@
-import { Box, Button, TextField, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { FC, useState } from "react";
 import { ReceiptItem } from "../model/receipt";
+import AddIcon from "@mui/icons-material/Add";
 
 type PurchasedItemProps = {
   onChange?: (item: ReceiptItem) => void;
@@ -13,20 +20,30 @@ const PurchasedItem: FC<PurchasedItemProps> = ({
 }) => {
   const [itemDescription, setItemDescription] = useState<string>("");
   const [itemPrice, setItemPrice] = useState<string>("");
+  const [error, setError] = useState<string>("");
 
   const handleSubmit = () => {
-    if (itemDescription && itemPrice) {
-      const newItem: ReceiptItem = {
-        shortDescription: itemDescription,
-        price: itemPrice,
-      };
-
-      if (onChange) {
-        onChange(newItem);
-      }
-      setItemDescription("");
-      setItemPrice("");
+    if (!itemDescription) {
+      setError("Please enter the items description");
+      return;
     }
+
+    if (!itemPrice) {
+      setError("Please enter the items price");
+      return;
+    }
+
+    const newItem: ReceiptItem = {
+      shortDescription: itemDescription,
+      price: itemPrice,
+    };
+
+    if (onChange) {
+      onChange(newItem);
+    }
+    setItemDescription("");
+    setItemPrice("");
+    setError("");
   };
 
   return (
@@ -68,9 +85,22 @@ const PurchasedItem: FC<PurchasedItemProps> = ({
           variant="outlined"
           size="medium"
           onClick={handleSubmit}
+          startIcon={<AddIcon />}
         >
           Add Item
         </Button>
+      )}
+      {error && (
+        <Alert
+          severity="error"
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          {error}
+        </Alert>
       )}
     </>
   );

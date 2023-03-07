@@ -13,6 +13,7 @@ import AddPurchasedItemComponent from "./AddPurchasedItemComponent";
 import Receipt, { ReceiptItem } from "../model/receipt";
 import FetchRewards from "../api/fetchRewards";
 import ReceiptPointsModal from "./ReceiptPointsModal";
+import CookieIcon from "@mui/icons-material/Cookie";
 
 const App: FC<unknown> = () => {
   const [success, setSuccess] = useState<string>("");
@@ -106,7 +107,7 @@ const App: FC<unknown> = () => {
 
           {/* error snackbar */}
           {error && (
-            <Grid item xs={12}>
+            <Grid item xs={12} sx={{ mt: 2, mb: 2 }}>
               <Alert
                 severity="error"
                 sx={{
@@ -122,7 +123,7 @@ const App: FC<unknown> = () => {
 
           {/* success snackbar */}
           {success && (
-            <Grid item xs={12}>
+            <Grid item xs={12} sx={{ mt: 2, mb: 3 }}>
               <Alert
                 severity="success"
                 sx={{
@@ -174,7 +175,7 @@ const App: FC<unknown> = () => {
           <AddPurchasedItemComponent
             onChange={(receiptItems) => {
               let summedCost: number = 0;
-              receiptItems.map((item) => {
+              receiptItems.forEach((item) => {
                 summedCost += +item.price;
               });
 
@@ -228,6 +229,7 @@ const App: FC<unknown> = () => {
                 <Button
                   variant="outlined"
                   onClick={() => setIsModalOpen(true)}
+                  startIcon={<CookieIcon />}
                 >
                   View Receipt Points
                 </Button>
