@@ -74,8 +74,7 @@ const ReceiptPointsModal: FC<ReceiptPointsModalProps> = ({
                 justifyContent: "center",
               }}
             >
-              This is for the receipt from {receipt.retailer} on{" "}
-              {receipt.purchaseDate}
+              This is for the receipt from {receipt.retailer} on {receipt.purchaseDate}
             </Typography>
             <Divider />
             <Typography
