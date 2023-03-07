@@ -54,6 +54,9 @@ const PurchasedItem: FC<PurchasedItemProps> = ({
   };
 
   const handleEditItemClick = () => {
+    // TODO: issue #20
+    // this is messy, basically checking if this receipt item component isn't the one at the bottom where you add receipt items
+    // the one at the bottom in the form won't have a receipt item or handleEditItem attribute passed to it
     if (!editingDisabled && handleEditItem && receiptItem) {
       handleEditItem(receiptItem.id, itemDescription, itemPrice);
       setEditingDisabled(true);
