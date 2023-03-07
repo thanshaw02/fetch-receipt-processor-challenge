@@ -20,8 +20,8 @@ const AddPurchasedItemComponent: FC<
   };
 
   const handleEditItem = (
-    itemId: string, 
-    itemDescription: string, 
+    itemId: string,
+    itemDescription: string,
     itemPrice: string
   ) => {
     const updatedArray = purchasedItems.map((item) => {
@@ -29,7 +29,7 @@ const AddPurchasedItemComponent: FC<
         return {
           id: itemId,
           shortDescription: itemDescription,
-          price: itemPrice
+          price: itemPrice,
         };
       }
       return item;

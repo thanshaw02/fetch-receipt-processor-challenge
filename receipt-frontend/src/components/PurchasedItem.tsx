@@ -9,23 +9,33 @@ import {
 } from "@mui/material";
 import { ReceiptItem } from "../model/receipt";
 import AddIcon from "@mui/icons-material/Add";
-import EditIcon from '@mui/icons-material/Edit';
+import EditIcon from "@mui/icons-material/Edit";
 import { v4 as uuid } from "uuid";
 
 type PurchasedItemProps = {
   receiptItem?: ReceiptItem;
   handleAddItem?: (item: ReceiptItem) => void;
-  handleEditItem?: (id: string, description: string, price: string) => void;
+  handleEditItem?: (
+    id: string,
+    description: string,
+    price: string
+  ) => void;
 };
 
 const PurchasedItem: FC<PurchasedItemProps> = ({
   receiptItem,
   handleAddItem,
-  handleEditItem
+  handleEditItem,
 }) => {
-  const [editingDisabled, setEditingDisabled] = useState<boolean>(!!receiptItem);
-  const [itemDescription, setItemDescription] = useState<string>(receiptItem?.shortDescription || "");
-  const [itemPrice, setItemPrice] = useState<string>(receiptItem?.price || "");
+  const [editingDisabled, setEditingDisabled] = useState<boolean>(
+    !!receiptItem
+  );
+  const [itemDescription, setItemDescription] = useState<string>(
+    receiptItem?.shortDescription || ""
+  );
+  const [itemPrice, setItemPrice] = useState<string>(
+    receiptItem?.price || ""
+  );
   const [error, setError] = useState<string>("");
 
   const handleSubmit = () => {
@@ -96,8 +106,8 @@ const PurchasedItem: FC<PurchasedItemProps> = ({
           value={itemPrice}
           onChange={(e) => setItemPrice(e.target.value)}
         />
-        <IconButton 
-          aria-label="edit-item" 
+        <IconButton
+          aria-label="edit-item"
           disabled={!receiptItem}
           onClick={handleEditItemClick}
         >
