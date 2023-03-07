@@ -1,5 +1,5 @@
 import { Box, Divider, Fade, Modal, Typography } from "@mui/material";
-import { FC, useEffect, useState } from "react";
+import { FC, useState } from "react";
 import FetchRewards from "../api/fetchRewards";
 import Receipt from "../model/receipt";
 
