@@ -94,6 +94,7 @@ const PurchasedItem: FC<PurchasedItemProps> = ({
         <Alert
           severity="error"
           sx={{
+            mb: 2,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
