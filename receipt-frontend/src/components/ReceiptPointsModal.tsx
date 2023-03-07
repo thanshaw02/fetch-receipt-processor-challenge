@@ -31,7 +31,7 @@ const ReceiptPointsModal: FC<ReceiptPointsModalProps> = ({
   const [accruedReceiptPoints, setAccruedReceiptPoints] =
     useState<string>("");
 
-  useEffect(() => {
+  if (!accruedReceiptPoints) {
     FetchRewards.getReceiptPoints(receiptId).then(
       (receiptPoints) => {
         setAccruedReceiptPoints(receiptPoints.points);
@@ -42,7 +42,7 @@ const ReceiptPointsModal: FC<ReceiptPointsModalProps> = ({
         );
       }
     );
-  });
+  }
 
   return (
     <>
