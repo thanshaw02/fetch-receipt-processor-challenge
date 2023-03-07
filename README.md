@@ -37,9 +37,18 @@ This repository holds my source code for a take-home exam for _Fetch Rewards_, t
 - This assumed you have _Go_ installed and configured on your machine
 - For instructions on how to install and configure Go using Windows Subsystem for Linux (WSL) [this link proved very helpful to myself](https://www.jetbrains.com/help/go/how-to-use-wsl-development-environment-in-product.html)
 
+## How to run the Receipt API frontend
+
+- From within the `receipt-frontend` directory run `yarn install`
+- Run `yarn start` in the same `receipt-frontend` directory
+- Navigate to `localhost:3000`
+
+**Note:**
+- The frontend relies on the _Go_ backend server, so make sure before using the frontend you build and run the backend Docker container
+
 # How to test the Receipt API
 
-**Note:** At the time of writing this I haven't included the frontend aspect which will allow you to test API from your browser rather than using `curl`, if/when I add the frontend I will update this README to reflect that change
+## Using curl
 
 1. From your console run this `curl` command to hit the `/receipts/process` POST endpoint:
     - This command specifically holds the same _Receipt_ data used in _example one_ of the assignment
@@ -73,6 +82,18 @@ I will include another POST curl command that represents _example two_ from the 
 Use the same GET `curl` command from the above section using the new id -- verify that `109` points are returned.
 
 You may do further testing my creating your own receipt objects, counting the points that receipt object should accrue, then sending that object to the POST endpoint and fetching the accruied points via the GET endpoint. If you run into any issues please feel free to make a comment in this repository or you can reach me by email add tylorjhanshaw@gmail.com.
+
+## Using the frontend
+
+- After running the backend Docker container and starting the frontend fill out the fields to create a `Receipt` object
+  - You will see error messages if a field is missing both in the main form and in the _add receipt items_ section
+- Verify that the _total_ field towards the bottom is correct based off of the items entered above
+- Click the `Submit Receipt` button to POST the receipt object to the backend
+  - You will see a success message towards the top of the form if the POST request was successful
+- Click the `View Receipt Points` button to view the accrued points for the submitted receipt
+
+**Note:**
+- You may submit as many receipt objects as you like, just make sure that the points accrued add up to the actual poinst accrued for the receipt
 
 # Final Thoughts
 
