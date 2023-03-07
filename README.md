@@ -11,10 +11,11 @@ This repository holds my source code for a take-home exam for _Fetch Rewards_, t
 **Note:**
 - The code that's directly related to this assignment can be found in: `receipt-api.go`, `/receiptstructs/structs.go`, and `/receiptstructs/methods.go`
 - The _frontend_ aspect of this assignment is strictly for testing the Go backend endpoints
+- Instructions below go into detail on how to test the _Go_ server endpoints using both _curl_ and the _frontend_
 
 ## How to run the Receipt API server using Docker
 
-1. Within the _fetch-receipt-processor-challenge_ directory build the Docker image by running `docker build --tag fetch-receipt-api .`
+1. Within the `fetch-receipt-processor-challenge` directory build the Docker image by running `docker build --tag fetch-receipt-api .`
 
 2. Confirm that a Docker image was created by running this command from the same directory `docker image ls`
 
@@ -34,7 +35,7 @@ This repository holds my source code for a take-home exam for _Fetch Rewards_, t
 
 ## How to run the Receipt API server without Docker
 
-1. Within the _fetch-receipt-processor-challenge_ directory simply run this command `go run receipt-api.go`
+1. Within the `fetch-receipt-processor-challenge` directory simply run this command `go run receipt-api.go`
 
 **Go Notes:**
 - This assumed you have _Go_ installed and configured on your machine
