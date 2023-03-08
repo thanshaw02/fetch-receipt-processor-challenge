@@ -5,6 +5,7 @@ import {
   Button,
   IconButton,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { ReceiptItem } from "../model/receipt";
@@ -106,13 +107,15 @@ const PurchasedItem: FC<PurchasedItemProps> = ({
           value={itemPrice}
           onChange={(e) => setItemPrice(e.target.value)}
         />
-        <IconButton
-          aria-label="edit-item"
-          disabled={!receiptItem}
-          onClick={handleEditItemClick}
-        >
-          <EditIcon />
-        </IconButton>
+        <Tooltip title="Click to edit this item, click again to submit your changes">
+          <IconButton
+            aria-label="edit-item"
+            disabled={!receiptItem}
+            onClick={handleEditItemClick}
+          >
+            <EditIcon />
+          </IconButton>
+        </Tooltip>
       </Box>
       {!receiptItem && (
         <Button
